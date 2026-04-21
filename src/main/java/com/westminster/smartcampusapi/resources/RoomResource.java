@@ -2,6 +2,7 @@ package com.westminster.smartcampusapi.resources;
 
 import com.westminster.smartcampusapi.models.Room;
 import com.westminster.smartcampusapi.services.DataStorage;
+import com.westminster.smartcampusapi.exceptions.RoomNotEmptyException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -82,6 +83,9 @@ public class RoomResource {
     /**
      * Task 2.4: Delete a room
      */
+    /**
+     * Task 2.4: Delete a room (Updated for Part 5.1 Exception Mapping)
+     */
     @DELETE
     @Path("/{roomId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -90,14 +94,14 @@ public class RoomResource {
 
         if (room == null) {
             return Response.status(Response.Status.NOT_FOUND)
-                           .entity("{\"error\": \"Room not found\"}")
-                           .build();
+                       .type(MediaType.APPLICATION_JSON)
+                       .entity("{\"error\": \"Resource not found\"}")
+                       .build();
         }
 
         if (!room.getSensorIds().isEmpty()) {
-            return Response.status(Response.Status.CONFLICT) 
-                           .entity("{\"error\": \"Cannot delete room. Remove sensors first.\"}")
-                           .build();
+            // Throwing this triggers the RoomNotEmptyMapper automatically
+            throw new RoomNotEmptyException("Cannot delete room " + roomId + ". It still contains active sensors.");
         }
 
         DataStorage.getRooms().remove(roomId);

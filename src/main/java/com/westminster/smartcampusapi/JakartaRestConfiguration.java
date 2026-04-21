@@ -1,13 +1,13 @@
 package com.westminster.smartcampusapi;
 
 import jakarta.ws.rs.ApplicationPath;
-import jakarta.ws.rs.core.Application;
+import org.glassfish.jersey.server.ResourceConfig;
 
-/**
- * Configures Jakarta RESTful Web Services for the application.
- * @author Juneau
- */
-@ApplicationPath("resources")
-public class JakartaRestConfiguration extends Application {
-    
+@ApplicationPath("/api/v1") // Ensure this is exactly /api/v1
+public class JakartaRestConfiguration extends ResourceConfig {
+    public JakartaRestConfiguration() {
+        // This tells Jersey where to find your Resources and Mappers
+        packages("com.westminster.smartcampusapi.resources", 
+                 "com.westminster.smartcampusapi.mappers");
+    }
 }

@@ -8,25 +8,27 @@ import jakarta.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
 
-@Path("/")
+@Path("/") 
 public class DiscoveryResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDiscovery() {
+    public Response getDiscoveryInfo() {
         Map<String, Object> response = new HashMap<>();
-    
-        // API Metadata
-        response.put("name", "Smart Campus IoT System");
-        response.put("version", "v1");
-    
-        // Discoverable Links
+        
+        // 1. Versioning & Meta
+        response.put("api_version", "1.0.0");
+        
+        // 2. REQUIRED: Administrative Contact
+        response.put("admin_contact", "your_id@westminster.ac.uk");
+        response.put("developer", "Your Name");
+        
+        // 3. Primary Resource Collections (HATEOAS)
         Map<String, String> links = new HashMap<>();
         links.put("rooms", "/api/v1/rooms");
-        links.put("sensors", "/api/v1/sensors"); // build this later
-        links.put("self", "/api/v1/");
-    
-        response.put("_links", links);
+        links.put("sensors", "/api/v1/sensors");
+        
+        response.put("links", links);
 
         return Response.ok(response).build();
     }
