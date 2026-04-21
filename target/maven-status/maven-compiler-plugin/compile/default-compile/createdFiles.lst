@@ -1,0 +1,11 @@
+com\westminster\smartcampusapi\config\RestConfiguration.class
+com\westminster\smartcampusapi\Main.class
+com\westminster\smartcampusapi\resources\RoomResource.class
+com\westminster\smartcampusapi\resources\SensorResource.class
+com\westminster\smartcampusapi\services\DataStorage.class
+com\westminster\smartcampusapi\models\Sensor.class
+com\westminster\smartcampusapi\JakartaRestConfiguration.class
+com\westminster\smartcampusapi\models\Room.class
+com\westminster\smartcampusapi\resources\JakartaEE11Resource.class
+com\westminster\smartcampusapi\models\Reading.class
+com\westminster\smartcampusapi\resources\DiscoveryResource.class
