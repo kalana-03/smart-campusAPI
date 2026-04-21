@@ -11,8 +11,8 @@ public class Main {
     public static final String BASE_URI = "http://localhost:8080/api/v1/";
 
     public static HttpServer startServer() {
-        // This tells Grizzly to look for your resources in the specified package
-        final ResourceConfig rc = new ResourceConfig().packages("com.westminster.smartcampusapi.resources");
+    // This line tells Grizzly to use your specific configuration class
+        final JakartaRestConfiguration rc = new JakartaRestConfiguration();
         return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
     }
 
