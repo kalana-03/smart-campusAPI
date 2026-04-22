@@ -15,7 +15,7 @@ A JAX-RS RESTful web service built with Jersey 2.32 and deployed on Apache Tomca
 
 **Prerequisites:** Java 8+, Maven 3.6+, Apache Tomcat 9+ (bundled with NetBeans)
 
-### Option 1 — NetBeans (Recommended)
+### Option 1 — NetBeans
 1. Open NetBeans and select **File → Open Project**
 2. Navigate to the `smartcampusAPI` folder and open it
 3. Right-click the project → **Clean and Build**
@@ -27,8 +27,8 @@ The server starts at `http://localhost:8080/smartcampus/api/v1`
 ### Option 2 — Maven + Tomcat manually
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/smartcampusAPI.git
-cd smartcampusAPI
+git clone https://github.com/kalana-03/smart-campusAPI.git
+cd smart-campusAPI
 
 # Build the WAR file
 mvn clean package
