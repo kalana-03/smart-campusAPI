@@ -5,29 +5,87 @@
 
 ## API Overview
 
-A JAX-RS RESTful web service built with Jersey and an embedded Grizzly server, providing full CRUD management of campus Rooms, Sensors, and Sensor Readings. The API follows REST best practices including resource nesting, semantic HTTP status codes, and comprehensive exception handling.
+A JAX-RS RESTful web service built with Jersey 2.32 and deployed on Apache Tomcat, providing full CRUD management of campus Rooms, Sensors, and Sensor Readings. The API follows REST best practices including resource nesting, semantic HTTP status codes, HATEOAS-style discovery, and comprehensive exception handling.
 
-**Base URL:** `http://localhost:8080/api/v1`
+**Base URL:** `http://localhost:8080/smartcampus/api/v1`
 
 ---
 
 ## Build & Run Instructions
 
-**Prerequisites:** Java 11+, Maven 3.6+
+**Prerequisites:** Java 8+, Maven 3.6+, Apache Tomcat 9+ (bundled with NetBeans)
 
+### Option 1 — NetBeans (Recommended)
+1. Open NetBeans and select **File → Open Project**
+2. Navigate to the `smartcampusAPI` folder and open it
+3. Right-click the project → **Clean and Build**
+4. Right-click the project → **Run**
+5. NetBeans will deploy the WAR to its bundled Tomcat automatically
+
+The server starts at `http://localhost:8080/smartcampus/api/v1`
+
+### Option 2 — Maven + Tomcat manually
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/smart-campus-api.git
-cd smart-campus-api
+git clone https://github.com/<your-username>/smartcampusAPI.git
+cd smartcampusAPI
 
-# Build the project
+# Build the WAR file
 mvn clean package
 
-# Start the embedded server
-mvn exec:java
+# Copy the WAR to your Tomcat webapps folder
+cp target/smartcampusAPI-1.0-SNAPSHOT.war /path/to/tomcat/webapps/smartcampus.war
+
+# Start Tomcat
+/path/to/tomcat/bin/startup.sh
 ```
 
-The server starts at `http://localhost:8080/api/v1`.
+The server starts at `http://localhost:8080/smartcampus/api/v1`
+
+---
+
+## Sample curl Commands
+
+### 1. Discovery — GET API metadata
+```bash
+curl -X GET http://localhost:8080/smartcampus/api/v1/
+```
+
+### 2. Create a Room — POST
+```bash
+curl -X POST http://localhost:8080/smartcampus/api/v1/rooms \
+  -H "Content-Type: application/json" \
+  -d '{"id": "R001", "name": "Lab 101", "capacity": 30}'
+```
+
+### 3. Get all Rooms with minimum capacity filter — GET
+```bash
+curl -X GET "http://localhost:8080/smartcampus/api/v1/rooms?minCapacity=20"
+```
+
+### 4. Create a Sensor linked to a Room — POST
+```bash
+curl -X POST http://localhost:8080/smartcampus/api/v1/sensors \
+  -H "Content-Type: application/json" \
+  -d '{"id": "TEMP-001", "type": "Temperature", "status": "ACTIVE", "currentValue": 22.5, "roomId": "R001"}'
+```
+
+### 5. Get all Sensors filtered by type — GET
+```bash
+curl -X GET "http://localhost:8080/smartcampus/api/v1/sensors?type=Temperature"
+```
+
+### 6. Post a Sensor Reading — POST
+```bash
+curl -X POST http://localhost:8080/smartcampus/api/v1/sensors/TEMP-001/readings \
+  -H "Content-Type: application/json" \
+  -d '{"id": "READ-001", "value": 23.1}'
+```
+
+### 7. Delete a Room (fails if sensors are assigned — 409 Conflict) — DELETE
+```bash
+curl -X DELETE http://localhost:8080/smartcampus/api/v1/rooms/R001
+```
 
 ---
 
@@ -37,7 +95,7 @@ The server starts at `http://localhost:8080/api/v1`.
 
 **Q1.1: Explain the default JAX-RS resource lifecycle and its impact on in-memory data management.**
 
-By default, JAX-RS creates a new instance of a resource class for every incoming HTTP request (per-request scope). This means instance fields are reset on each request, so shared data cannot be stored as instance variables. To persist state across requests, in-memory data stores (e.g., `ConcurrentHashMap`) are held as `static` fields in a dedicated data-store class, which lives for the JVM's lifetime. Because multiple requests can arrive concurrently, `ConcurrentHashMap` is used instead of `HashMap` to prevent race conditions, and `synchronized` blocks are applied where multiple data structures must be updated atomically.
+By default, JAX-RS creates a new instance of a resource class for every incoming HTTP request (per-request scope). This means instance fields are reset on each request, so shared data cannot be stored as instance variables. To persist state across requests, in-memory data stores are held as `static` fields in a dedicated `DataStorage` class, which lives for the JVM's lifetime. Because multiple requests can arrive concurrently, `ConcurrentHashMap` is used instead of `HashMap` to prevent race conditions, and atomic operations are applied where multiple data structures must be updated together.
 
 ---
 
@@ -71,15 +129,14 @@ Even though the responses are different, the final state does not change — the
 **Q3.1: What happens if a client sends data in a format other than `application/json` to a method annotated with `@Consumes(MediaType.APPLICATION_JSON)`?**
 
 If a client sends data in a format other than `application/json`, the request will not reach the resource method at all. The JAX-RS framework automatically detects the mismatch and responds with `415 Unsupported Media Type`.
-This happens before any application code runs, so the method never executes. This built in behavior ensures that the method only receives data it can properly understand, removing the need to manually check the request format in the code
+This happens before any application code runs, so the method never executes. This built-in behavior ensures that the method only receives data it can properly understand, removing the need to manually check the request format in the code.
 
 ---
 
 **Q3.2: Why is `@QueryParam` preferred over path segments for filtering (e.g., `/sensors?type=CO2` vs `/sensors/type/CO2`)?**
 
-Path segments are usually used to identify a specific resource, while query parameters are used to filter or narrow down a collection. So using `/sensors/type/CO2` suggests that "CO2" is a fixed sub-resource with its own identity, which is not really accurate when we are just filtering sensors.
+Path segments are usually used to identify a specific resource, while query parameters are used to filter or narrow down a collection. So using `/sensors/type/CO2` suggests that "CO2" is a fixed sub-resource with its own identity, which is not accurate when we are just filtering sensors.
 Query parameters like `/sensors?type=CO2` make it clear that we are simply requesting a filtered list of sensors. They are also more flexible, since multiple filters can be added easily, such as `?type=CO2&status=ACTIVE`.
-
 
 ---
 
@@ -99,17 +156,12 @@ By splitting responsibilities across smaller classes, the application stays more
 `404 Not Found` is used when the requested URL itself does not exist. In this case, when a client sends a request to `/api/v1/sensors`, the endpoint is valid and available, so a 404 response would be misleading.
 The actual issue is inside the request body — the `roomId` provided does not exist, even though the JSON format is correct. This is where `422 Unprocessable Entity` is more appropriate, because it indicates that the request is syntactically valid but contains invalid or incorrect data.
 
-
 ---
 
 **Q5.2: What are the security risks of exposing Java stack traces to API consumers?**
 
-They can reveal details about the server’s technology stack and library versions, which attackers could use to find known vulnerabilities. They may also expose internal class names, method structures, and even file paths, giving insight into how the application is built. In some cases, stack traces can also include parts of real request data.
+They can reveal details about the server's technology stack and library versions, which attackers could use to find known vulnerabilities. They may also expose internal class names, method structures, and even file paths, giving insight into how the application is built. In some cases, stack traces can also include parts of real request data.
 
-To avoid this, a global `ExceptionMapper<Throwable>` is used to return only a simple `500` error message to the client, while the full error details are safely logged on the server for debugging.
+To avoid this, a global `ExceptionMapper<Throwable>` is used to return only a generic `500` error message to the client, while the full error details are safely logged on the server for debugging.
 
 ---
-
-## Video Demonstration
-
-[Link to Postman demonstration video — submitted via Blackboard]
