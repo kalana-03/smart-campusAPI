@@ -4,9 +4,10 @@ import com.westminster.smartcampusapi.exceptions.RoomNotEmptyException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
-import jakarta.ws.rs.ext.Provider;
+import jakarta.ws.rs.ext.Provider; //tells Jersey to use this class to handle errors
 
-@Provider // This tells Jersey to use this class to handle errors
+//Part5.1 - Exception mapper for RoomNotEmptyException (409 Conflict)
+@Provider 
 public class RoomNotEmptyMapper implements ExceptionMapper<RoomNotEmptyException> {
     @Override
     public Response toResponse(RoomNotEmptyException exception) {

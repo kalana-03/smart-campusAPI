@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Sensor {
     private String id;
-    private String type; // e.g., "Temperature"
+    private String type; 
     private String roomId;
     private double currentValue;
     private String status;
@@ -14,7 +14,7 @@ public class Sensor {
 
     public Sensor() {
         this.readings = new ArrayList<>();
-        this.status = "ACTIVE"; // Default status
+        this.status = "ACTIVE"; // defualt status
     }
 
     public Sensor(String id, String type, String roomId) {
