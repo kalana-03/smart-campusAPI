@@ -6,6 +6,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 
+//Part5.3 - Exception mapper for SensorUnavailableException(403 forbidden)
 @Provider
 public class SensorUnavailableMapper implements ExceptionMapper<SensorUnavailableException> {
     @Override
