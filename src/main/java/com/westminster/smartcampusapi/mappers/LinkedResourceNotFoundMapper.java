@@ -8,6 +8,7 @@ import jakarta.ws.rs.ext.Provider;
 import java.util.HashMap;
 import java.util.Map;
 
+//Part 5.2 - Exception mapper for LinkedResourceNotFoundException (422 unprocessable entity)
 @Provider
 public class LinkedResourceNotFoundMapper implements ExceptionMapper<LinkedResourceNotFoundException> {
     @Override
@@ -18,7 +19,7 @@ public class LinkedResourceNotFoundMapper implements ExceptionMapper<LinkedResou
 
         return Response.status(422) // Unprocessable Entity
                 .type(MediaType.APPLICATION_JSON)
-                .entity(errorData) // Jersey handles the JSON conversion
+                .entity(errorData) // JSON conversion
                 .build();
 }
 }

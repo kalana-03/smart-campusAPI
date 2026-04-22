@@ -3,12 +3,12 @@ package com.westminster.smartcampusapi.models;
 import java.util.UUID;
 
 public class Reading {
-    private String id;        // Required: UUID
-    private double value;     // Required
-    private long timestamp;   // Required: Epoch Milliseconds
+    private String id;        // UUID
+    private double value;    
+    private long timestamp;   // Epoch milliseconds
 
+    //defualt constructor 
     public Reading() {
-        // Default constructor for JSON deserialization
     }
 
     public Reading(double value) {

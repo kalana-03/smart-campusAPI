@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+//Part 2.1 - Room Resource Implementation
+//full CRUD operations for the room entities
 @Path("/rooms")
 public class RoomResource {
 
-    /**
-     * UNIFIED Task 2.1 & 3.1: Retrieve all rooms with optional filtering
-     * This handles both GET /rooms AND GET /rooms?minCapacity=X
-     */
+    // Part 2.1 - GET /api/v1/rooms
+    // return list of all rooms
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllRooms(@QueryParam("minCapacity") Integer minCapacity) {
@@ -25,16 +25,15 @@ public class RoomResource {
         // If the user provided a minCapacity, filter the list
         if (minCapacity != null) {
             roomList = roomList.stream()
-                .filter(r -> r.getCapacity() >= minCapacity)
-                .collect(Collectors.toList());
+                .filter(r -> r.getCapacity() >= minCapacity) //checking r capacity is <= mincapacity
+                .collect(Collectors.toList()); //adding them to a list
         }
 
         return Response.ok(roomList).build();
     }
 
-    /**
-     * Task 1.2: Retrieve a specific room by ID
-     */
+    // Part 2.1 - GET /api/v1/rooms/{roomId}
+    // return 404 not found if the room not exist
     @GET
     @Path("/{roomId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -50,13 +49,13 @@ public class RoomResource {
         return Response.ok(room).build();
     }
 
-    /**
-     * Task 2.1: Add a new room
-     */
+    //Part 2.1 - POST /api/v1/rooms
+    // create new room 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addRoom(Room room) {
+        // validating the ID
         if (room.getId() == null || room.getId().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
                            .entity("{\"error\": \"Room ID is required\"}")
@@ -80,12 +79,8 @@ public class RoomResource {
                        .build();
     }
     
-    /**
-     * Task 2.4: Delete a room
-     */
-    /**
-     * Task 2.4: Delete a room (Updated for Part 5.1 Exception Mapping)
-     */
+    // Part 2.2 - DELETE /api/v1/rooms/{roomId}
+    // Part 5.1 - Room deletion safety logic(409 conflict)
     @DELETE
     @Path("/{roomId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -98,9 +93,9 @@ public class RoomResource {
                        .entity("{\"error\": \"Resource not found\"}")
                        .build();
         }
-
+        
         if (!room.getSensorIds().isEmpty()) {
-            // Throwing this triggers the RoomNotEmptyMapper automatically
+            // automatically trigger the RoomNotEmptyMapper 
             throw new RoomNotEmptyException("Cannot delete room " + roomId + ". It still contains active sensors.");
         }
 

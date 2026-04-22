@@ -10,10 +10,8 @@ import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Sub-resource for handling readings of a specific sensor.
- * Path: /sensors/{sensorId}/readings
- */
+// Part 4.1 - The Sub-Resource Locator Pattern
+// managing the reading history of a specific sensor
 public class SensorReadingResource {
     private String sensorId;
 
@@ -21,37 +19,41 @@ public class SensorReadingResource {
         this.sensorId = sensorId;
     }
     
+    // Part 4.2 - Historical Data Management
+    // retrieve full list of reading recored for the sensor
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<Reading> getReadings() {
         Sensor sensor = DataStorage.getSensors().get(sensorId);
         if (sensor == null) {
-            throw new NotFoundException("Sensor not found");
+            throw new NotFoundException("Sensor not found"); //404
         }
         return sensor.getReadings();
     }
-
+    
+    // Part 4.2 - Historical Data Management
+    // add a new rreading to sensor history
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addReading(Reading newReading) {
         Sensor sensor = DataStorage.getSensors().get(sensorId);
         
-        // Safety check if sensor exists
+        // check if sensor exists
         if (sensor == null) {
             throw new NotFoundException("Sensor " + sensorId + " not found.");
         }
 
-        // Task 5.3: Check sensor status
+        // Task 5.3: block reading if the sensor under maintenance
         if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus())) {
             throw new SensorUnavailableException("Sensor " + sensorId + " is currently under maintenance.");
         }
 
-        // --- SPEC ALIGNMENT (Task 3.3) ---
-        newReading.setId(UUID.randomUUID().toString());      // Required UUID
-        newReading.setTimestamp(System.currentTimeMillis()); // Required Epoch Milliseconds
+        // asssign UUID and timestamp
+        newReading.setId(UUID.randomUUID().toString());    
+        newReading.setTimestamp(System.currentTimeMillis()); 
         
-        // Update sensor state
+        // update the sensor currentvalue
         sensor.setCurrentValue(newReading.getValue());
         sensor.getReadings().add(newReading);
 
