@@ -1,0 +1,25 @@
+package com.westminster.smartcampusapi.mappers;
+
+import com.westminster.smartcampusapi.exceptions.LinkedResourceNotFoundException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+import java.util.HashMap;
+import java.util.Map;
+
+//Part 5.2 - Exception mapper for LinkedResourceNotFoundException (422 unprocessable entity)
+@Provider
+public class LinkedResourceNotFoundMapper implements ExceptionMapper<LinkedResourceNotFoundException> {
+    @Override
+    public Response toResponse(LinkedResourceNotFoundException exception) {
+        Map<String, String> errorData = new HashMap<>();
+        errorData.put("error", exception.getMessage());
+        errorData.put("code", "RESOURCE_UNLINKED");
+
+        return Response.status(422) // Unprocessable Entity
+                .type(MediaType.APPLICATION_JSON)
+                .entity(errorData) // JSON conversion
+                .build();
+}
+}
